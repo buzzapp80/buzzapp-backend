@@ -4,6 +4,7 @@ export interface IProfile {
   user: Types.ObjectId; // Reference to User model
   handle: string;
   avatar_url?: string;
+  avatar_public_id?: string;
   bio?: string;
   wallet_address?: string;
   reputation: number;

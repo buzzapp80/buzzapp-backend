@@ -53,6 +53,7 @@ const ProfileSchema = new Schema<IProfile>(
     },
     handle: { type: String, unique: true, required: true, trim: true },
     avatar_url: { type: String },
+    avatar_public_id: { type: String },
     bio: { type: String, maxlength: 500 },
     wallet_address: { type: String },
     reputation: { type: Number, default: 0 },

@@ -3,9 +3,11 @@ import { protect } from "../middlewares/auth.middleware.js";
 import { validate } from "../middlewares/validate.middleware.js";
 import { updateProfileSchema } from "../validations/profile.validation.js";
 import {
+  handleAvatarUpload,
   handleGetMe,
   handleUpdateProfile,
 } from "../controllers/profile.controller.js";
+import { upload } from "../config/cloudinary.js";
 
 const router = Router();
 
@@ -133,5 +135,85 @@ router.patch(
  *         description: Internal server error
  */
 router.get("/me", protect, handleGetMe);
+
+/**
+ * @openapi
+ * /profile/avatar:
+ *   post:
+ *     tags: [Profile]
+ *     summary: Upload or update user avatar
+ *     description: |
+ *       Uploads a new profile avatar image for the currently authenticated user.
+ *
+ *       - Accepts a single image file via multipart/form-data (field name: usually `avatar` or similar)
+ *       - Supported formats typically include jpg, jpeg, png, webp, gif
+ *       - Overwrites any existing avatar (previous file may be deleted server-side)
+ *       - Protected route — requires a valid Bearer access token
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               avatar:          # ← this is the expected field name in the form
+ *                 type: string
+ *                 format: binary
+ *                 description: Image file to upload as new avatar
+ *             required:
+ *               - avatar
+ *     responses:
+ *       200:
+ *         description: Avatar uploaded/updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Avatar updated
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     avatar_url:
+ *                       type: string
+ *                       format: uri
+ *                       description: Public URL of the newly uploaded avatar
+ *                       example: https://res.cloudinary.com/.../profiles/avatars/avatar_123456789.jpg
+ *                   required:
+ *                     - avatar_url
+ *               required:
+ *                 - success
+ *                 - message
+ *                 - data
+ *       400:
+ *         description: Bad request – no file provided or invalid file type/size
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: No file uploaded
+ *       401:
+ *         description: Unauthorized – missing or invalid access token
+ *       413:
+ *         description: Payload Too Large – file exceeds size limit
+ *       415:
+ *         description: Unsupported Media Type – invalid image format
+ *       500:
+ *         description: Internal server error (e.g. upload service failure)
+ */
+router.post("/avatar", protect, upload.single("avatar"), handleAvatarUpload);
 
 export { router as profileRouter };
