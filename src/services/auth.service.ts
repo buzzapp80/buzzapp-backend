@@ -17,7 +17,7 @@ export const generateTokens = async (
     {
       id: userId,
       role,
-      is_verified: isVerified, // <--- Add this here
+      is_verified: isVerified,
     },
     env.JWT_SECRET,
     { expiresIn: "15m" },

@@ -26,7 +26,7 @@ export const registerUser = async (data: RegisterUserBody) => {
         {
           email_or_phone: data.email_or_phone,
           password_hash,
-          role: "user",
+          role: data.role,
         },
       ],
       { session },
